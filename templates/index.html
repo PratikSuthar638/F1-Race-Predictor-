@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}F1 Race Predictor — Home{% endblock %}
+
+{% block content %}
+<section class="page-hero" style="padding: 60px 0 40px 0;">
+    <div class="container">
+        <span class="badge">🏎️ Machine Learning Engineering Project</span>
+        <h2>FORMULA 1 PODIUM PREDICTOR</h2>
+        <p>Predicting Grand Prix Top 3 finishes using pre-race rolling feature engineering, historical telemetry, and chronological machine learning models.</p>
+        
+        <div style="display: flex; gap: 16px; justify-content: center; margin-top: 28px;">
+            <a href="/predict" class="btn-predict" style="display: inline-flex; width: auto; padding: 14px 28px; text-decoration: none;">
+                🏁 Launch Predictor
+            </a>
+            <a href="/dashboard" class="btn-predict" style="display: inline-flex; width: auto; padding: 14px 28px; text-decoration: none; background: #1b202d; box-shadow: none; border: 1px solid var(--border-subtle);">
+                📊 View Analytics & ML
+            </a>
+        </div>
+    </div>
+</section>
+
+<div class="container" style="margin-bottom: 50px;">
+    <!-- KPI Overview -->
+    <div class="grid-4-col">
+        <div class="kpi-card">
+            <div class="kpi-title">Historical Races</div>
+            <div class="kpi-value">1,125</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">1950 &ndash; 2024 Seasons</p>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Driver Starts</div>
+            <div class="kpi-value">26,759</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Cleaned race entries</p>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Best Model ROC-AUC</div>
+            <div class="kpi-value" style="color: var(--f1-cyan);">0.9237</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Random Forest Ensemble</p>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Test F1-Score</div>
+            <div class="kpi-value" style="color: var(--f1-gold);">0.6466</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">2023–2024 Test Set</p>
+        </div>
+    </div>
+
+    <!-- Core Features Grid -->
+    <div class="grid-3-col">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><span class="icon">🛡️</span> Zero Data Leakage</div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.92rem;">
+                Strictly utilizes data available prior to the race start. Excludes in-race telemetry (lap times, pit stops, fastest lap) and computes cumulative rolling statistics only on prior historical rounds.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><span class="icon">⏱️</span> Chronological Validation</div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.92rem;">
+                Trained on 2010–2021 races, validated on the 2022 regulation overhaul season, and rigorously benchmarked on unseen 2023–2024 Grand Prix races.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><span class="icon">🧠</span> 5-Model Comparison</div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.92rem;">
+                Trains and compares Logistic Regression, Decision Trees, Random Forest, Gradient Boosting, and XGBoost with calibrated class weights.
+            </p>
+        </div>
+    </div>
+
+    <!-- Workflow Preview Card -->
+    <div class="card" style="margin-top: 10px;">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">⚙️</span> Machine Learning Pipeline Architecture</div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; padding: 10px 0;">
+            <div style="background: var(--bg-secondary); padding: 12px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center; flex: 1; min-width: 150px;">
+                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">1. Raw Ergast Data</div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">14 CSV Datasets</div>
+            </div>
+            <div style="color: var(--f1-red); font-weight: 700;">&rarr;</div>
+            <div style="background: var(--bg-secondary); padding: 12px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center; flex: 1; min-width: 150px;">
+                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">2. Feature Engineering</div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">26 Pre-Race Features</div>
+            </div>
+            <div style="color: var(--f1-red); font-weight: 700;">&rarr;</div>
+            <div style="background: var(--bg-secondary); padding: 12px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center; flex: 1; min-width: 150px;">
+                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">3. Chronological Split</div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">Train / Val / Test</div>
+            </div>
+            <div style="color: var(--f1-red); font-weight: 700;">&rarr;</div>
+            <div style="background: var(--bg-secondary); padding: 12px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center; flex: 1; min-width: 150px;">
+                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">4. ML Classification</div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">Random Forest</div>
+            </div>
+            <div style="color: var(--f1-red); font-weight: 700;">&rarr;</div>
+            <div style="background: var(--bg-secondary); padding: 12px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center; flex: 1; min-width: 150px;">
+                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">5. Web Inference</div>
+                <div style="font-weight: 700; color: var(--f1-gold); font-size: 0.95rem;">Podium Probability</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

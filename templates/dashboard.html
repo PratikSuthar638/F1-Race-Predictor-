@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard — F1 Race Predictor{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="badge">📊 Model Telemetry & Historical Analytics</span>
+        <h2>F1 PREDICTION ANALYTICS DASHBOARD</h2>
+        <p>Comprehensive evaluation metrics, model benchmarking on unseen 2023–2024 test data, feature importances, and historical Formula 1 performance distributions.</p>
+    </div>
+</section>
+
+<div class="container" style="margin-bottom: 60px;">
+    <!-- Key Model Performance KPIs -->
+    <div class="grid-4-col">
+        <div class="kpi-card">
+            <div class="kpi-title">Best Model</div>
+            <div class="kpi-value" style="font-size: 1.5rem; color: #fff;">{{ stats.best_model_name }}</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Top Benchmark Performer</p>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Test ROC-AUC Score</div>
+            <div class="kpi-value" style="color: var(--f1-cyan);">{{ "%.4f"|format(stats.best_roc_auc) }}</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Discrimination Capability</p>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Test F1-Score</div>
+            <div class="kpi-value" style="color: var(--f1-gold);">{{ "%.4f"|format(stats.best_f1) }}</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Harmonic Mean (P & R)</p>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Test Accuracy</div>
+            <div class="kpi-value" style="color: var(--f1-green);">{{ "%.2f"|format(stats.best_accuracy * 100) }}%</div>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">On 2023–2024 Races</p>
+        </div>
+    </div>
+
+    <!-- Model Comparison Table -->
+    <div class="card" style="margin-bottom: 30px;">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">🏆</span> Machine Learning Model Benchmark Comparison (Test Set: 2023–2024)</div>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">Chronological Test Evaluation</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 12px;">
+            Models were trained on 2010–2021 races (5,077 starts), validated on 2022 (440 starts), and evaluated on 2023–2024 (919 starts). Evaluated at calibrated threshold of 0.35 to account for the ~15% podium class base rate.
+        </p>
+
+        <div class="table-container">
+            <table class="f1-table">
+                <thead>
+                    <tr>
+                        <th>Model Algorithm</th>
+                        <th>Accuracy</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1-Score</th>
+                        <th>ROC-AUC</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in stats.models_table %}
+                    <tr>
+                        <td style="font-weight: 600; color: #fff;">{{ m.Model }}</td>
+                        <td>{{ "%.2f"|format(m.Accuracy * 100) }}%</td>
+                        <td>{{ "%.4f"|format(m.Precision) }}</td>
+                        <td>{{ "%.4f"|format(m.Recall) }}</td>
+                        <td class="highlight">{{ "%.4f"|format(m.F1) }}</td>
+                        <td style="font-family: var(--font-racing); font-weight: 700; color: var(--f1-gold);">{{ "%.4f"|format(m['ROC-AUC']) }}</td>
+                        <td>
+                            {% if loop.first %}
+                            <span class="badge" style="background: rgba(0, 230, 118, 0.15); border: 1px solid var(--f1-green); color: var(--f1-green); margin: 0; font-size: 0.72rem;">★ BEST MODEL</span>
+                            {% else %}
+                            <span style="color: var(--text-dim); font-size: 0.8rem;">Evaluated</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Visualizations Gallery (2-col grid) -->
+    <div style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 18px;">
+        📈 Machine Learning & Historical Telemetry Visualizations
+    </div>
+
+    <div class="grid-2-col" style="margin-bottom: 24px;">
+        <!-- Chart 6: Model Comparison -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart6_model_comparison.png') }}" alt="Model Comparison Chart">
+            <div class="chart-caption">
+                <strong>Figure 1: Machine Learning Model Comparison</strong> &mdash; Multi-metric comparison across all 5 trained models on the test set.
+            </div>
+        </div>
+
+        <!-- Chart 7: Feature Importance -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart7_feature_importance.png') }}" alt="Feature Importance Chart">
+            <div class="chart-caption">
+                <strong>Figure 2: Engineered Feature Importances</strong> &mdash; Top pre-race features driving podium classification in the Random Forest model.
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2-col" style="margin-bottom: 24px;">
+        <!-- Chart 8: Confusion Matrix -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart8_confusion_matrix.png') }}" alt="Confusion Matrix">
+            <div class="chart-caption">
+                <strong>Figure 3: Confusion Matrix on Test Set</strong> &mdash; True Positives, True Negatives, False Positives, and False Negatives.
+            </div>
+        </div>
+
+        <!-- Chart 9: ROC Curves -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart9_roc_curves.png') }}" alt="ROC Curves Comparison">
+            <div class="chart-caption">
+                <strong>Figure 4: ROC Curves Benchmark</strong> &mdash; True Positive Rate vs False Positive Rate curves across all classification algorithms.
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2-col" style="margin-bottom: 24px;">
+        <!-- Chart 3: Grid vs Podium -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart3_grid_vs_podium.png') }}" alt="Grid vs Podium Probability">
+            <div class="chart-caption">
+                <strong>Figure 5: Starting Grid Position vs Podium Conversion</strong> &mdash; Empirical probability of securing a Top 3 finish from each grid slot.
+            </div>
+        </div>
+
+        <!-- Chart 4: Driver Recent Form -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart4_driver_recent_form.png') }}" alt="Driver Recent Form vs Finish">
+            <div class="chart-caption">
+                <strong>Figure 6: Driver Recent Form Score vs Actual Finish</strong> &mdash; Correlation between exponential decay recent form rating and final finishing position.
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2-col" style="margin-bottom: 24px;">
+        <!-- Chart 5: Constructor Performance -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart5_constructor_performance.png') }}" alt="Constructor Performance">
+            <div class="chart-caption">
+                <strong>Figure 7: Constructor Performance Rating vs Podium Rate</strong> &mdash; Car package strength translated to podium finish percentages.
+            </div>
+        </div>
+
+        <!-- Chart 1: Podiums by Driver -->
+        <div class="chart-img-card">
+            <img src="{{ url_for('static', filename='images/chart1_podiums_by_driver.png') }}" alt="Top Drivers Podiums">
+            <div class="chart-caption">
+                <strong>Figure 8: All-Time Top Drivers by Total Podiums</strong> &mdash; Historical race wins and top 3 career finishes across Formula 1 history.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

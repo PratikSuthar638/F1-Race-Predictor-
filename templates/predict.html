@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Race Predictor — F1 Machine Learning Console{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="badge">🏎️ Pre-Race Telemetry Engine</span>
+        <h2>GRAND PRIX PODIUM PREDICTOR</h2>
+        <p>Select the circuit, driver, constructor, and starting grid slot to simulate real-time ML podium probability before the lights go out.</p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Error Alert Box -->
+    <div id="errorAlert" style="display: none; background: rgba(225, 6, 0, 0.2); border: 1px solid var(--f1-red); color: #ff8585; padding: 14px 20px; border-radius: var(--radius-sm); margin-bottom: 24px; font-weight: 500;"></div>
+
+    <div class="grid-2-col">
+        <!-- LEFT COLUMN: Track & Race Conditions -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><span class="icon">📍</span> Track & Race Conditions</div>
+                <span style="font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase;">Circuit Context</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="circuitSelect">Select Track / Grand Prix</label>
+                <select id="circuitSelect" class="form-select">
+                    {% for c in circuits %}
+                    <option value="{{ c }}" {% if 'Monaco' in c or 'Silverstone' in c or loop.first %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Circuit Info Panel -->
+            <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">Circuit Telemetry</span>
+                    <span class="badge" style="margin-bottom: 0; font-size: 0.72rem;">FIA Approved</span>
+                </div>
+                
+                <div class="stat-pills" style="margin-top: 0;">
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Track Altitude</div>
+                        <div id="trackAltitude" class="stat-pill-value">45 m</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Historical Grands Prix</div>
+                        <div id="trackRaces" class="stat-pill-value">70 Grands Prix</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Race Distance & Weather -->
+            <div class="form-group">
+                <label class="form-label">Race Distance</label>
+                <input type="text" class="form-control" value="305.35 km (Standard FIA Distance)" readonly style="background: #10131a; color: var(--text-muted); cursor: not-allowed;">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="weatherSelect">Weather Conditions (Optional Input)</label>
+                <select id="weatherSelect" class="form-select">
+                    <option value="Dry">☀️ Dry Track (Optimal Grip)</option>
+                    <option value="Damp">⛅ Damp / Intermediate Conditions</option>
+                    <option value="Wet">🌧️ Wet / High Degradation</option>
+                </select>
+            </div>
+
+            <!-- Track Visual Graphic -->
+            <div style="margin-top: 10px; background: rgba(0,0,0,0.3); border: 1px dashed var(--border-subtle); border-radius: var(--radius-md); padding: 16px; text-align: center;">
+                <div style="font-family: var(--font-racing); color: var(--f1-cyan); font-size: 0.85rem; letter-spacing: 1px;">🏁 LIVE TELEMETRY SIMULATION</div>
+                <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">Features dynamically calculated strictly prior to race start.</div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Driver & Car Parameters -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><span class="icon">🏎️</span> Driver & Car Parameters</div>
+                <span style="font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase;">Pre-Race Setup</span>
+            </div>
+
+            <!-- Driver Select -->
+            <div class="form-group">
+                <label class="form-label" for="driverSelect">Select Driver</label>
+                <select id="driverSelect" class="form-select">
+                    {% for d in drivers %}
+                    <option value="{{ d }}" {% if 'Verstappen' in d or 'Leclerc' in d or 'Hamilton' in d or loop.first %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Constructor Select -->
+            <div class="form-group">
+                <label class="form-label" for="constructorSelect">Select Constructor / Team</label>
+                <select id="constructorSelect" class="form-select">
+                    {% for c in constructors %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Grid & Qualifying Position -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="gridInput">Grid Position <span class="label-val">(1–30)</span></label>
+                    <input type="number" id="gridInput" class="form-control" min="1" max="30" value="1" style="font-family: var(--font-racing); font-size: 1.1rem; font-weight: 700; color: #fff;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="qualiInput">Qualifying Pos <span class="label-val">(1–30)</span></label>
+                    <input type="number" id="qualiInput" class="form-control" min="1" max="30" value="1" style="font-family: var(--font-racing); font-size: 1.1rem; font-weight: 700; color: #fff;">
+                </div>
+            </div>
+
+            <!-- Recent Driver Form Slider -->
+            <div class="form-group">
+                <div class="form-label">
+                    <span>Recent Driver Form (Weighted Last 5)</span>
+                    <span id="driverFormVal" class="label-val">8.5 / 10</span>
+                </div>
+                <div class="range-container">
+                    <input type="range" id="driverFormSlider" class="form-range" min="0.0" max="10.0" step="0.1" value="8.5">
+                    <div class="range-scale">
+                        <span>0.0 (Poor)</span>
+                        <span>5.0 (Midfield)</span>
+                        <span>10.0 (Dominant)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Car Performance Slider -->
+            <div class="form-group">
+                <div class="form-label">
+                    <span>Overall Car Performance (Team Rating)</span>
+                    <span id="teamPerfVal" class="label-val">8.8 / 10</span>
+                </div>
+                <div class="range-container">
+                    <input type="range" id="teamPerfSlider" class="form-range" min="0.0" max="10.0" step="0.1" value="8.8">
+                    <div class="range-scale">
+                        <span>0.0 (Backmarker)</span>
+                        <span>5.0 (Midfield)</span>
+                        <span>10.0 (Top Team)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver Career Snapshot Pills -->
+            <div class="stat-pills">
+                <div class="stat-pill">
+                    <div class="stat-pill-label">Career Podiums</div>
+                    <div id="driverPodiumsStat" class="stat-pill-value">--</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="stat-pill-label">Total Race Starts</div>
+                    <div id="driverStartsStat" class="stat-pill-value">--</div>
+                </div>
+            </div>
+
+            <!-- Big Prediction Trigger Button -->
+            <div style="margin-top: 24px;">
+                <button type="button" id="predictBtn" class="btn-predict">
+                    <span>🏁 PREDICT PODIUM</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREDICTION RESULT CARD -->
+    <div id="resultCard" class="result-card">
+        <div class="result-header">
+            <div class="driver-banner">
+                <div id="driverAvatar" class="driver-avatar-circle">MV</div>
+                <div class="driver-details">
+                    <h3 id="resDriver">Max Verstappen</h3>
+                    <p id="resTeam" style="color: var(--f1-cyan); font-weight: 600;">Red Bull Racing</p>
+                    <p id="resTrack" style="font-size: 0.8rem; color: var(--text-dim);">Circuit de Monaco (Grid: P1)</p>
+                </div>
+            </div>
+            <div>
+                <span id="resBadge" class="badge-outcome podium">🏆 PODIUM FINISH</span>
+            </div>
+        </div>
+
+        <div class="probability-section">
+            <div>
+                <div class="prob-meter-label">
+                    <span>Podium Finish Probability</span>
+                    <span id="resProbPct" class="pct-val">78.4%</span>
+                </div>
+                <div class="progress-track">
+                    <div id="resProbFill" class="progress-fill gold" style="width: 78.4%;"></div>
+                </div>
+                <p style="font-size: 0.78rem; color: var(--text-dim); margin-top: 8px;">
+                    Calibrated probability based on starting grid, recent form decay, constructor baseline, and historical circuit conversion.
+                </p>
+            </div>
+
+            <div style="border-left: 1px solid var(--border-subtle); padding-left: 20px;">
+                <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Model Confidence</div>
+                <div id="resConfidence" style="font-family: var(--font-racing); font-size: 1.8rem; font-weight: 700; color: #fff; margin-top: 4px;">
+                    82.1%
+                </div>
+                <div style="font-size: 0.75rem; color: var(--f1-green); margin-top: 2px;">
+                    ● High Confidence Prediction
+                </div>
+            </div>
+        </div>
+
+        <!-- Factors Explanation Breakdown -->
+        <div>
+            <div style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: #fff;">
+                Why this prediction? (Feature Impact Analysis)
+            </div>
+            <div id="resFactorsList" class="factors-list">
+                <!-- Dynamically injected factor items -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

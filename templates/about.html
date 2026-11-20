@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}About & Documentation — F1 Race Predictor{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="badge">📖 Engineering Project Documentation</span>
+        <h2>PROJECT ARCHITECTURE & METHODOLOGY</h2>
+        <p>Comprehensive engineering technical details, mathematical formulation, feature engineering, and data leakage prevention strategy.</p>
+    </div>
+</section>
+
+<div class="container" style="max-width: 1000px; margin-bottom: 60px;">
+    <!-- Abstract Card -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">🏎️</span> Project Abstract</div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7;">
+            The <strong>F1 Race Predictor</strong> is an end-to-end Machine Learning system developed to predict whether a Formula 1 driver will achieve a <strong>Podium finish (Top 3)</strong> in a given Grand Prix race. Built upon 75 seasons of official FIA Formula 1 historical data (1950–2024), the project addresses key challenges in sports analytics: severe data leakage risks, temporal concept drift across technical regulation eras, and class imbalance in race outcomes.
+        </p>
+    </div>
+
+    <!-- Mathematical Formulation -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">📐</span> Problem Formulation</div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 14px;">
+            The problem is formulated as a supervised binary classification task:
+        </p>
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 16px; border-radius: var(--radius-sm); font-family: var(--font-racing); color: var(--f1-cyan); font-size: 1rem; text-align: center; margin-bottom: 14px;">
+            y = 1 &nbsp; if positionOrder &le; 3 &nbsp; (Podium Finish)<br>
+            y = 0 &nbsp; if positionOrder &ge; 4 or DNF &nbsp; (No Podium)
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+            Rather than predicting exact numerical positions (which suffer from high stochastic variance due to safety cars and mechanical retirements), binary podium classification provides actionable, calibrated probability bounds.
+        </p>
+    </div>
+
+    <!-- Data Leakage Section -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">🛡️</span> Strict Pre-Race Data Leakage Prevention</div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+            In predictive sports modeling, data leakage occurs when information generated during or after an event is mistakenly included in feature matrices during model training. To ensure 100% pre-race authenticity:
+        </p>
+        <ul style="color: var(--text-muted); font-size: 0.92rem; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+            <li><strong>Excluded Post-Race Features:</strong> Final race position, race points, race duration, fastest lap time/rank, and in-race telemetry are strictly dropped.</li>
+            <li><strong>Excluded Telemetry Files:</strong> <code>lap_times.csv</code> and <code>pit_stops.csv</code> are fully excluded from the pre-race feature matrix.</li>
+            <li><strong>Lagged Championship Standings:</strong> Standings are lagged to round <code>k - 1</code>, ensuring the model only sees points accumulated prior to the race weekend.</li>
+            <li><strong>Cumulative Historical Windowing:</strong> Driver and constructor form, career podium rates, and circuit-specific track records are computed strictly over historical races occurring before the date of the race being predicted.</li>
+        </ul>
+    </div>
+
+    <!-- Chronological Split Strategy -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">⏱️</span> Chronological Validation Strategy</div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+            Random $K$-fold cross-validation or random train-test splitting violates the temporal structure of Formula 1 by allowing models to learn from future races to predict past events. We enforce a strictly chronological split:
+        </p>
+        <div class="stat-pills" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 10px;">
+            <div class="stat-pill">
+                <div class="stat-pill-label">Training Set (2010–2021)</div>
+                <div class="stat-pill-value" style="font-size: 1rem; color: #fff;">5,077 Starts</div>
+                <div style="font-size: 0.72rem; color: var(--text-dim);">V8 & V6 Hybrid Eras</div>
+            </div>
+            <div class="stat-pill">
+                <div class="stat-pill-label">Validation Set (2022)</div>
+                <div class="stat-pill-value" style="font-size: 1rem; color: var(--f1-cyan);">440 Starts</div>
+                <div style="font-size: 0.72rem; color: var(--text-dim);">Ground-Effect Aero Shift</div>
+            </div>
+            <div class="stat-pill">
+                <div class="stat-pill-label">Testing Set (2023–2024)</div>
+                <div class="stat-pill-value" style="font-size: 1rem; color: var(--f1-gold);">919 Starts</div>
+                <div style="font-size: 0.72rem; color: var(--text-dim);">Modern Evaluation Benchmark</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Engineering Breakdown -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">⚙️</span> Key Engineered Feature Groups</div>
+        </div>
+        <div class="table-container">
+            <table class="f1-table">
+                <thead>
+                    <tr>
+                        <th>Feature Name</th>
+                        <th>Category</th>
+                        <th>Engineering Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-family: var(--font-racing); color: var(--f1-cyan);">grid_position</td>
+                        <td>Grid / Quali</td>
+                        <td>Starting grid slot for the Grand Prix (1 to 24).</td>
+                    </tr>
+                    <tr>
+                        <td style="font-family: var(--font-racing); color: var(--f1-cyan);">driver_recent_form_score</td>
+                        <td>Driver</td>
+                        <td>Normalized 0–10 score with exponential decay weights on driver's last 5 finishes.</td>
+                    </tr>
+                    <tr>
+                        <td style="font-family: var(--font-racing); color: var(--f1-cyan);">constructor_recent_perf</td>
+                        <td>Constructor</td>
+                        <td>Normalized 0–10 rating across constructor's cars in the last 5 races.</td>
+                    </tr>
+                    <tr>
+                        <td style="font-family: var(--font-racing); color: var(--f1-cyan);">qualifying_diff_team</td>
+                        <td>Quali Relative</td>
+                        <td>Driver qualifying position minus teammate / constructor average qualifying rank.</td>
+                    </tr>
+                    <tr>
+                        <td style="font-family: var(--font-racing); color: var(--f1-cyan);">driver_circuit_podium_rate</td>
+                        <td>Track Mastery</td>
+                        <td>Historical conversion rate of podium finishes at this specific circuit.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Viva Questions Link Card -->
+    <div class="card" style="border: 1px solid rgba(225, 6, 0, 0.4); background: rgba(225, 6, 0, 0.05);">
+        <div class="card-header">
+            <div class="card-title"><span class="icon">🎓</span> Examination & Viva Preparation</div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+            A complete 45+ question viva preparation guide is available in <code>VIVA_QUESTIONS.md</code>, covering machine learning algorithms, evaluation metrics, overfitting, feature engineering, and system deployment.
+        </p>
+    </div>
+</div>
+{% endblock %}
